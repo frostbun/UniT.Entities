@@ -29,7 +29,7 @@ namespace UniT.Entities.Component
         public void OnRecycle();
 
         #if UNIT_UNITASK
-        public CancellationToken GetCancellationTokenOnRecycle();
+        public CancellationToken GetCancellationTokenOnDisable();
         #else
         public void StartCoroutine(IEnumerator coroutine);
 

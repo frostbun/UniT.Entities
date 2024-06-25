@@ -22,7 +22,7 @@ namespace UniT.Entities.Component.Controller
         protected Transform Transform => this.Owner.Transform;
 
         #if UNIT_UNITASK
-        protected CancellationToken GetCancellationTokenOnRecycle() => this.Owner.GetCancellationTokenOnRecycle();
+        protected CancellationToken GetCancellationTokenOnDisable() => this.Owner.GetCancellationTokenOnDisable();
         #else
         protected void StartCoroutine(IEnumerator coroutine) => this.Owner.StartCoroutine(coroutine);
 

@@ -4,9 +4,6 @@ namespace UniT.Entities.Component
     using UniT.Entities.Entity;
     using UniT.Extensions;
     using UnityEngine;
-    #if UNIT_UNITASK
-    using System.Threading;
-    #endif
 
     public abstract class Component : BetterMonoBehavior, IComponent
     {
@@ -22,37 +19,15 @@ namespace UniT.Entities.Component
 
         public GameObject GameObject => this.gameObject;
 
-        public Transform Transform { get; private set; } = null!;
+        public Transform Transform => this.transform ??= base.transform;
 
-        void IComponent.OnInstantiate()
-        {
-            this.Transform = this.transform;
-            this.OnInstantiate();
-        }
+        private new Transform? transform;
 
-        void IComponent.OnSpawn()
-        {
-            this.OnSpawn();
-        }
+        void IComponent.OnInstantiate() => this.OnInstantiate();
 
-        void IComponent.OnRecycle()
-        {
-            #if UNIT_UNITASK
-            this.recycleCts?.Cancel();
-            this.recycleCts?.Dispose();
-            this.recycleCts = null;
-            #endif
-            this.OnRecycle();
-        }
+        void IComponent.OnSpawn() => this.OnSpawn();
 
-        #if UNIT_UNITASK
-        private CancellationTokenSource? recycleCts;
-
-        public CancellationToken GetCancellationTokenOnRecycle()
-        {
-            return (this.recycleCts ??= new CancellationTokenSource()).Token;
-        }
-        #endif
+        void IComponent.OnRecycle() => this.OnRecycle();
 
         protected virtual void OnInstantiate() { }
 
