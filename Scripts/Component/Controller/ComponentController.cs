@@ -3,7 +3,6 @@ namespace UniT.Entities.Component.Controller
 {
     using UniT.Entities.Controller;
     using UniT.Entities.Entity;
-    using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     #else
@@ -18,8 +17,6 @@ namespace UniT.Entities.Component.Controller
         protected IEntityManager Manager => this.Owner.Manager;
 
         protected IEntity Entity => this.Owner.Entity;
-
-        protected Transform Transform => this.Owner.Transform;
 
         #if UNIT_UNITASK
         protected CancellationToken GetCancellationTokenOnDisable() => this.Owner.GetCancellationTokenOnDisable();

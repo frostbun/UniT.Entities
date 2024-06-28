@@ -2,12 +2,14 @@
 namespace UniT.Entities.Entity
 {
     using UniT.Entities.Component;
+    using UnityEngine;
 
     public interface IEntity : IComponent
     {
-        public T[] GetComponentsInChildren<T>();
-
         public void Recycle();
+
+        // ReSharper disable once InconsistentNaming
+        public GameObject gameObject { get; }
     }
 
     public interface IEntityWithoutParams : IEntity

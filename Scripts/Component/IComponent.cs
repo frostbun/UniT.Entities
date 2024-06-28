@@ -2,7 +2,6 @@
 namespace UniT.Entities.Component
 {
     using UniT.Entities.Entity;
-    using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     #else
@@ -15,12 +14,6 @@ namespace UniT.Entities.Component
         public IEntityManager Manager { get; set; }
 
         public IEntity Entity { get; set; }
-
-        public string Name { get; }
-
-        public GameObject GameObject { get; }
-
-        public Transform Transform { get; }
 
         public void OnInstantiate();
 

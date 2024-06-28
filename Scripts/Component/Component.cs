@@ -3,7 +3,6 @@ namespace UniT.Entities.Component
 {
     using UniT.Entities.Entity;
     using UniT.Extensions;
-    using UnityEngine;
 
     public abstract class Component : BetterMonoBehavior, IComponent
     {
@@ -14,14 +13,6 @@ namespace UniT.Entities.Component
         public IEntityManager Manager { get; private set; } = null!;
 
         public IEntity Entity { get; private set; } = null!;
-
-        public string Name => this.gameObject.name;
-
-        public GameObject GameObject => this.gameObject;
-
-        public Transform Transform => this.transform ??= base.transform;
-
-        private new Transform? transform;
 
         void IComponent.OnInstantiate() => this.OnInstantiate();
 

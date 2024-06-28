@@ -45,7 +45,7 @@ namespace UniT.Entities
 
         #endregion
 
-        void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.GameObject, count);
+        void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
 
         void IEntityManager.Load(string key, int count) => this.objectPoolManager.Load(key, count);
 
@@ -57,7 +57,7 @@ namespace UniT.Entities
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform? parent)
         {
-            var entity = this.objectPoolManager.Spawn(prefab.GameObject, position, rotation, parent).GetComponent<TEntity>();
+            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent).GetComponent<TEntity>();
             this.OnSpawn(entity);
             this.spawnedEntities.Add(entity, prefab);
             return entity;
@@ -65,7 +65,7 @@ namespace UniT.Entities
 
         TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform? parent)
         {
-            var entity = this.objectPoolManager.Spawn(prefab.GameObject, position, rotation, parent).GetComponent<TEntity>();
+            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent).GetComponent<TEntity>();
             entity.Params = @params;
             this.OnSpawn(entity);
             this.spawnedEntities.Add(entity, prefab);
@@ -93,13 +93,13 @@ namespace UniT.Entities
         {
             this.spawnedEntities.Remove(entity);
             this.OnRecycle(entity);
-            this.objectPoolManager.Recycle(entity.GameObject);
+            this.objectPoolManager.Recycle(entity.gameObject);
         }
 
         void IEntityManager.RecycleAll(IEntity prefab)
         {
             this.OnRecycleAll(prefab);
-            this.objectPoolManager.RecycleAll(prefab.GameObject);
+            this.objectPoolManager.RecycleAll(prefab.gameObject);
         }
 
         void IEntityManager.RecycleAll(string key)
@@ -110,7 +110,7 @@ namespace UniT.Entities
 
         void IEntityManager.Cleanup(IEntity prefab, int retainCount)
         {
-            this.objectPoolManager.Cleanup(prefab.GameObject, retainCount);
+            this.objectPoolManager.Cleanup(prefab.gameObject, retainCount);
             this.OnCleanup();
         }
 
@@ -123,8 +123,8 @@ namespace UniT.Entities
         void IEntityManager.Unload(IEntity prefab)
         {
             this.OnRecycleAll(prefab);
-            this.objectPoolManager.RecycleAll(prefab.GameObject);
-            this.objectPoolManager.Unload(prefab.GameObject);
+            this.objectPoolManager.RecycleAll(prefab.gameObject);
+            this.objectPoolManager.Unload(prefab.gameObject);
             this.OnCleanup();
         }
 
@@ -140,7 +140,7 @@ namespace UniT.Entities
         {
             this.entities.GetOrAdd(entity, () =>
             {
-                var components = entity.GetComponentsInChildren<IComponent>();
+                var components = entity.gameObject.GetComponentsInChildren<IComponent>();
                 components.ForEach(component =>
                 {
                     this.componentToTypes.Add(
@@ -193,7 +193,7 @@ namespace UniT.Entities
         {
             this.entities.RemoveAll((entity, components) =>
             {
-                if (entity.GameObject) return false;
+                if (entity.gameObject) return false;
                 components.ForEach(component => this.componentToTypes.Remove(component));
                 return true;
             });
