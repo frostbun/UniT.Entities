@@ -160,8 +160,8 @@ namespace UniT.Entities
                         controller.Owner = owner;
                         owner.Controller = controller;
                     }
-                    component.OnInstantiate();
                 });
+                components.ForEach(component => component.OnInstantiate());
                 return components;
             }).ForEach(component =>
             {
