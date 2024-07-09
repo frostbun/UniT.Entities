@@ -16,6 +16,6 @@ namespace UniT.Entities.Entity
     {
         TParams IEntityWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        public TParams Params { get; private set; } = default!;
+        protected TParams Params { get; private set; } = default!;
     }
 }
