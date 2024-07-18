@@ -37,9 +37,10 @@ namespace UniT.Entities
         [Preserve]
         public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
         {
-            this.container         = container;
-            this.objectPoolManager = objectPoolManager;
-            this.logger            = loggerManager.GetLogger(this);
+            this.container                       =  container;
+            this.objectPoolManager               =  objectPoolManager;
+            this.objectPoolManager.OnInstantiate += this.OnInstantiate;
+            this.logger                          =  loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
@@ -136,47 +137,44 @@ namespace UniT.Entities
             this.OnCleanup();
         }
 
+        private void OnInstantiate(GameObject instance)
+        {
+            var entity     = instance.GetComponentOrThrow<IEntity>();
+            var components = entity.gameObject.GetComponentsInChildren<IComponent>();
+            this.entities.Add(entity, components);
+            components.ForEach(component =>
+            {
+                this.componentToTypes.Add(
+                    component,
+                    component.GetType()
+                        .GetInterfaces()
+                        .Where(type => !typeof(IComponent).IsAssignableFrom(type))
+                        .Where(type => !typeof(IHasController).IsAssignableFrom(type))
+                        .Prepend(component.GetType())
+                        .ToArray()
+                );
+                component.Manager = this;
+                component.Entity  = entity;
+                if (component is IHasController owner)
+                {
+                    var controller = (IController)this.container.Instantiate(owner.ControllerType);
+                    controller.Owner = owner;
+                    owner.Controller = controller;
+                }
+            });
+            components.ForEach(component => component.OnInstantiate());
+        }
+
         private void OnSpawn(IEntity entity)
         {
-            this.entities.GetOrAdd(entity, () =>
-            {
-                var components = entity.gameObject.GetComponentsInChildren<IComponent>();
-                components.ForEach(component =>
-                {
-                    this.componentToTypes.Add(
-                        component,
-                        component.GetType()
-                            .GetInterfaces()
-                            .Where(type => !typeof(IComponent).IsAssignableFrom(type))
-                            .Where(type => !typeof(IHasController).IsAssignableFrom(type))
-                            .Prepend(component.GetType())
-                            .ToArray()
-                    );
-                    component.Manager = this;
-                    component.Entity  = entity;
-                    if (component is IHasController owner)
-                    {
-                        var controller = (IController)this.container.Instantiate(owner.ControllerType);
-                        controller.Owner = owner;
-                        owner.Controller = controller;
-                    }
-                });
-                components.ForEach(component => component.OnInstantiate());
-                return components;
-            }).ForEach(component =>
-            {
-                this.componentToTypes[component].ForEach(type => this.typeToComponents.GetOrAdd(type).Add(component));
-                component.OnSpawn();
-            });
+            this.entities[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToComponents.GetOrAdd(type).Add(component)));
+            this.entities[entity].ForEach(component => component.OnSpawn());
         }
 
         private void OnRecycle(IEntity entity)
         {
-            this.entities[entity].ForEach(component =>
-            {
-                component.OnRecycle();
-                this.componentToTypes[component].ForEach(type => this.typeToComponents.GetOrAdd(type).Remove(component));
-            });
+            this.entities[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToComponents[type].Remove(component)));
+            this.entities[entity].ForEach(component => component.OnRecycle());
         }
 
         private void OnRecycleAll(object obj)
