@@ -1,8 +1,10 @@
 ﻿#nullable enable
 namespace UniT.Entities.Entity
 {
-    using UniT.Entities.Component;
+    using UnityEngine;
+    using Component = UniT.Entities.Component.Component;
 
+    [DisallowMultipleComponent]
     public abstract class BaseEntity : Component, IEntity
     {
         public void Recycle() => this.Manager.Recycle(this);
