@@ -6,8 +6,6 @@ namespace UniT.Entities.Entity
 
     public interface IEntity : IComponent
     {
-        public void Recycle();
-
         // ReSharper disable once InconsistentNaming
         public GameObject gameObject { get; }
     }

@@ -8,7 +8,7 @@ namespace UniT.Entities.Entity.Controller
     {
         protected new TEntity Entity => this.Owner;
 
-        protected void Recycle() => this.Owner.Recycle();
+        protected void Recycle() => this.Manager.Recycle(this.Owner);
     }
 
     public abstract class EntityController<TEntity> : BaseEntityController<TEntity> where TEntity : IEntityWithoutParams, IHasController
