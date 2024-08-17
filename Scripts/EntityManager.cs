@@ -46,6 +46,8 @@ namespace UniT.Entities
 
         #endregion
 
+        #region Public
+
         void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
 
         void IEntityManager.Load(string key, int count) => this.objectPoolManager.Load(key, count);
@@ -137,6 +139,15 @@ namespace UniT.Entities
             this.OnCleanup();
         }
 
+        IEnumerable<T> IEntityManager.Query<T>()
+        {
+            return this.typeToComponents.GetOrDefault(typeof(T))?.Cast<T>() ?? Enumerable.Empty<T>();
+        }
+
+        #endregion
+
+        #region Private
+
         private void OnInstantiate(GameObject instance)
         {
             if (!instance.TryGetComponent<IEntity>(out var entity)) return;
@@ -148,8 +159,6 @@ namespace UniT.Entities
                     component,
                     component.GetType()
                         .GetInterfaces()
-                        .Where(type => !typeof(IComponent).IsAssignableFrom(type))
-                        .Where(type => !typeof(IHasController).IsAssignableFrom(type))
                         .Prepend(component.GetType())
                         .ToArray()
                 );
@@ -179,7 +188,7 @@ namespace UniT.Entities
 
         private void OnRecycleAll(object obj)
         {
-            this.spawnedEntities.RemoveAll((entity, key) =>
+            this.spawnedEntities.RemoveWhere((entity, key) =>
             {
                 if (key != obj) return false;
                 this.OnRecycle(entity);
@@ -189,7 +198,7 @@ namespace UniT.Entities
 
         private void OnCleanup()
         {
-            this.entities.RemoveAll((entity, components) =>
+            this.entities.RemoveWhere((entity, components) =>
             {
                 if (entity.gameObject) return false;
                 components.ForEach(component => this.componentToTypes.Remove(component));
@@ -197,9 +206,6 @@ namespace UniT.Entities
             });
         }
 
-        IEnumerable<T> IEntityManager.Query<T>()
-        {
-            return this.typeToComponents.GetOrDefault(typeof(T))?.Cast<T>() ?? Enumerable.Empty<T>();
-        }
+        #endregion
     }
 }

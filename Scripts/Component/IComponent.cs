@@ -2,6 +2,7 @@
 namespace UniT.Entities.Component
 {
     using UniT.Entities.Entity;
+    using UnityEngine;
 
     public interface IComponent
     {
@@ -14,5 +15,8 @@ namespace UniT.Entities.Component
         public void OnSpawn();
 
         public void OnRecycle();
+
+        // ReSharper disable once InconsistentNaming
+        public GameObject gameObject { get; }
     }
 }

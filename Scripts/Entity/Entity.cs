@@ -16,8 +16,8 @@ namespace UniT.Entities.Entity
 
     public abstract class Entity<TParams> : BaseEntity, IEntityWithParams<TParams>
     {
-        TParams IEntityWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
+        TParams IEntityWithParams<TParams>.Params { set => this.Params = value; }
 
-        protected TParams Params { get; private set; } = default!;
+        public TParams Params { get; private set; } = default!;
     }
 }
