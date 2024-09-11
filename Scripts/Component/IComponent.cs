@@ -18,5 +18,8 @@ namespace UniT.Entities.Component
 
         // ReSharper disable once InconsistentNaming
         public GameObject gameObject { get; }
+
+        // ReSharper disable once InconsistentNaming
+        public Transform transform { get; }
     }
 }
