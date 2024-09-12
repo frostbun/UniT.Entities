@@ -1,12 +1,12 @@
 #if UNIT_ZENJECT
 #nullable enable
-namespace UniT.Entities
+namespace UniT.Entities.DI
 {
-    using UniT.Logging;
-    using UniT.Pooling;
+    using UniT.Logging.DI;
+    using UniT.Pooling.DI;
     using Zenject;
 
-    public static class ZenjectBinder
+    public static class EntityManagerZenject
     {
         public static void BindEntityManager(this DiContainer container)
         {

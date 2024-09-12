@@ -1,12 +1,12 @@
 ﻿#if UNIT_DI
 #nullable enable
-namespace UniT.Entities
+namespace UniT.Entities.DI
 {
     using UniT.DI;
-    using UniT.Logging;
-    using UniT.Pooling;
+    using UniT.Logging.DI;
+    using UniT.Pooling.DI;
 
-    public static class DIBinder
+    public static class EntityManagerDI
     {
         public static void AddEntityManager(this DependencyContainer container)
         {
