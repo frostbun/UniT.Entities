@@ -151,7 +151,7 @@ namespace UniT.Entities
         private void OnInstantiate(GameObject instance)
         {
             if (!instance.TryGetComponent<IEntity>(out var entity)) return;
-            var components = entity.gameObject.GetComponentsInChildren<IComponent>();
+            var components = entity.GetComponentsInChildren<IComponent>();
             this.entities.Add(entity, components);
             components.ForEach(component =>
             {

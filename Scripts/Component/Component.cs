@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace UniT.Entities.Component
 {
+    using System.Diagnostics.CodeAnalysis;
     using UniT.Entities.Entity;
     using UniT.Extensions;
 
@@ -25,5 +26,25 @@ namespace UniT.Entities.Component
         protected virtual void OnSpawn() { }
 
         protected virtual void OnRecycle() { }
+
+        #region Extensions
+
+        public new T GetComponent<T>() => this.GetComponentOrThrow<T>();
+
+        public bool HasComponent<T>() => UnityExtensions.HasComponent<T>(this);
+
+        public new T GetComponentInChildren<T>(bool includeInactive = false) => this.GetComponentInChildrenOrThrow<T>(includeInactive);
+
+        public bool HasComponentInChildren<T>(bool includeInactive = false) => UnityExtensions.HasComponentInChildren<T>(this, includeInactive);
+
+        public bool TryGetComponentInChildren<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => UnityExtensions.TryGetComponentInChildren(this, out component, includeInactive);
+
+        public new T GetComponentInParent<T>(bool includeInactive = false) => this.GetComponentInParentOrThrow<T>(includeInactive);
+
+        public bool HasComponentInParent<T>(bool includeInactive = false) => UnityExtensions.HasComponentInParent<T>(this, includeInactive);
+
+        public bool TryGetComponentInParent<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => UnityExtensions.TryGetComponentInParent(this, out component, includeInactive);
+
+        #endregion
     }
 }
