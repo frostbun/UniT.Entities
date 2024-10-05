@@ -19,13 +19,13 @@ namespace UniT.Entities
 
         public void Load(string key, int count = 1);
 
-        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithoutParams;
+        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool worldPositionStays = true) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithParams<TParams>;
+        public TEntity Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool worldPositionStays = true) where TEntity : IEntityWithParams<TParams>;
 
-        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithoutParams;
+        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool worldPositionStays = true) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithParams<TParams>;
+        public TEntity Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool worldPositionStays = true) where TEntity : IEntityWithParams<TParams>;
 
         public void Recycle(IEntity instance);
 

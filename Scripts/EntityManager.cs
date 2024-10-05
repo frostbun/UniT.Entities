@@ -58,34 +58,34 @@ namespace UniT.Entities
         IEnumerator IEntityManager.LoadAsync(string key, int count, Action? callback, IProgress<float>? progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
         #endif
 
-        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform? parent)
+        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform? parent, bool worldPositionStays)
         {
-            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent).GetComponent<TEntity>();
+            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, worldPositionStays).GetComponent<TEntity>();
             this.OnSpawn(entity);
             this.spawnedEntities.Add(entity, prefab);
             return entity;
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform? parent)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform? parent, bool worldPositionStays)
         {
-            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent).GetComponent<TEntity>();
+            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, worldPositionStays).GetComponent<TEntity>();
             entity.Params = @params;
             this.OnSpawn(entity);
             this.spawnedEntities.Add(entity, prefab);
             return entity;
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform? parent)
+        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform? parent, bool worldPositionStays)
         {
-            var entity = this.objectPoolManager.Spawn(key, position, rotation, parent).GetComponentOrThrow<TEntity>();
+            var entity = this.objectPoolManager.Spawn(key, position, rotation, parent, worldPositionStays).GetComponentOrThrow<TEntity>();
             this.OnSpawn(entity);
             this.spawnedEntities.Add(entity, key);
             return entity;
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position, Quaternion rotation, Transform? parent)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position, Quaternion rotation, Transform? parent, bool worldPositionStays)
         {
-            var entity = this.objectPoolManager.Spawn(key, position, rotation, parent).GetComponentOrThrow<TEntity>();
+            var entity = this.objectPoolManager.Spawn(key, position, rotation, parent, worldPositionStays).GetComponentOrThrow<TEntity>();
             entity.Params = @params;
             this.OnSpawn(entity);
             this.spawnedEntities.Add(entity, key);
