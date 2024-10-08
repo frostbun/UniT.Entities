@@ -29,10 +29,10 @@ namespace UniT.Entities
         private readonly IObjectPoolManager   objectPoolManager;
         private readonly ILogger              logger;
 
-        private readonly Dictionary<IEntity, IComponent[]>     entities         = new Dictionary<IEntity, IComponent[]>();
-        private readonly Dictionary<IComponent, Type[]>        componentToTypes = new Dictionary<IComponent, Type[]>();
-        private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
-        private readonly Dictionary<IEntity, object>           spawnedEntities  = new Dictionary<IEntity, object>();
+        private readonly Dictionary<IEntity, IReadOnlyList<IComponent>> entities         = new Dictionary<IEntity, IReadOnlyList<IComponent>>();
+        private readonly Dictionary<IComponent, IReadOnlyList<Type>>    componentToTypes = new Dictionary<IComponent, IReadOnlyList<Type>>();
+        private readonly Dictionary<Type, HashSet<IComponent>>          typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
+        private readonly Dictionary<IEntity, object>                    spawnedEntities  = new Dictionary<IEntity, object>();
 
         [Preserve]
         public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
