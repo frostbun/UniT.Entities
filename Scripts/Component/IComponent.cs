@@ -25,6 +25,10 @@ namespace UniT.Entities.Component
 
         #region Extensions
 
+        #region Self
+
+        public T? GetComponentOrDefault<T>();
+
         public T GetComponent<T>();
 
         public T[] GetComponents<T>();
@@ -32,6 +36,12 @@ namespace UniT.Entities.Component
         public bool HasComponent<T>();
 
         public bool TryGetComponent<T>([MaybeNullWhen(false)] out T component);
+
+        #endregion
+
+        #region Children
+
+        public T? GetComponentInChildrenOrDefault<T>(bool includeInactive = false);
 
         public T GetComponentInChildren<T>(bool includeInactive = false);
 
@@ -41,6 +51,12 @@ namespace UniT.Entities.Component
 
         public bool TryGetComponentInChildren<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false);
 
+        #endregion
+
+        #region Parent
+
+        public T? GetComponentInParentOrDefault<T>(bool includeInactive = false);
+
         public T GetComponentInParent<T>(bool includeInactive = false);
 
         public T[] GetComponentsInParent<T>(bool includeInactive = false);
@@ -48,6 +64,8 @@ namespace UniT.Entities.Component
         public bool HasComponentInParent<T>(bool includeInactive = false);
 
         public bool TryGetComponentInParent<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false);
+
+        #endregion
 
         #endregion
     }

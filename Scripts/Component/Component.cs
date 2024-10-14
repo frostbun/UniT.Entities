@@ -29,15 +29,21 @@ namespace UniT.Entities.Component
 
         #region Extensions
 
+        public T? GetComponentOrDefault<T>() => base.GetComponent<T>();
+
         public new T GetComponent<T>() => this.GetComponentOrThrow<T>();
 
         public bool HasComponent<T>() => UnityExtensions.HasComponent<T>(this);
+
+        public T? GetComponentInChildrenOrDefault<T>(bool includeInactive = false) => base.GetComponentInChildren<T>(includeInactive);
 
         public new T GetComponentInChildren<T>(bool includeInactive = false) => this.GetComponentInChildrenOrThrow<T>(includeInactive);
 
         public bool HasComponentInChildren<T>(bool includeInactive = false) => UnityExtensions.HasComponentInChildren<T>(this, includeInactive);
 
         public bool TryGetComponentInChildren<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => UnityExtensions.TryGetComponentInChildren(this, out component, includeInactive);
+
+        public T? GetComponentInParentOrDefault<T>(bool includeInactive = false) => base.GetComponentInParent<T>(includeInactive);
 
         public new T GetComponentInParent<T>(bool includeInactive = false) => this.GetComponentInParentOrThrow<T>(includeInactive);
 
