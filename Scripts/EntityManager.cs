@@ -190,7 +190,7 @@ namespace UniT.Entities
         {
             this.spawnedEntities.RemoveWhere((entity, key) =>
             {
-                if (key != obj) return false;
+                if (!key.Equals(obj)) return false;
                 this.OnRecycle(entity);
                 return true;
             });
