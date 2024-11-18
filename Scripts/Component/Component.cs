@@ -2,14 +2,19 @@
 namespace UniT.Entities.Component
 {
     using System.Diagnostics.CodeAnalysis;
+    using UniT.DI;
     using UniT.Entities.Entity;
     using UniT.Extensions;
 
     public abstract class Component : BetterMonoBehavior, IComponent
     {
+        IDependencyContainer IComponent.Container { set => this.Container = value; }
+
         IEntityManager IComponent.Manager { get => this.Manager; set => this.Manager = value; }
 
         IEntity IComponent.Entity { get => this.Entity; set => this.Entity = value; }
+
+        protected IDependencyContainer Container { get; private set; } = null!;
 
         public IEntityManager Manager { get; private set; } = null!;
 

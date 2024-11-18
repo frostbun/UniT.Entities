@@ -162,8 +162,9 @@ namespace UniT.Entities
                         .Prepend(component.GetType())
                         .ToArray()
                 );
-                component.Manager = this;
-                component.Entity  = entity;
+                component.Container = this.container;
+                component.Manager   = this;
+                component.Entity    = entity;
                 if (component is IHasController owner)
                 {
                     var controller = (IController)this.container.Instantiate(owner.ControllerType);

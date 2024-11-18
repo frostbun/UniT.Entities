@@ -2,11 +2,14 @@
 namespace UniT.Entities.Component
 {
     using System.Diagnostics.CodeAnalysis;
+    using UniT.DI;
     using UniT.Entities.Entity;
     using UnityEngine;
 
     public interface IComponent
     {
+        public IDependencyContainer Container { set; }
+
         public IEntityManager Manager { get; set; }
 
         public IEntity Entity { get; set; }
