@@ -4,6 +4,12 @@ namespace UniT.Entities
     using System.Diagnostics.CodeAnalysis;
     using UniT.DI;
     using UnityEngine;
+    #if UNIT_UNITASK
+    using System.Threading;
+    #else
+    using System.Collections;
+    using System.Collections.Generic;
+    #endif
 
     public interface IComponent
     {
@@ -66,6 +72,22 @@ namespace UniT.Entities
         public bool HasComponentInParent<T>(bool includeInactive = false);
 
         public bool TryGetComponentInParent<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false);
+
+        #endregion
+
+        #region Async
+
+        #if UNIT_UNITASK
+        public CancellationToken GetCancellationTokenOnDisable();
+        #else
+        public void StartCoroutine(IEnumerator coroutine);
+
+        public void StopCoroutine(IEnumerator coroutine);
+
+        public IEnumerator GatherCoroutines(params IEnumerator[] coroutines);
+
+        public IEnumerator GatherCoroutines(IEnumerable<IEnumerator> coroutines);
+        #endif
 
         #endregion
 
