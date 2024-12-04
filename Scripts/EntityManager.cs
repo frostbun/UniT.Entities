@@ -192,7 +192,7 @@ namespace UniT.Entities
         {
             this.entities.RemoveWhere((entity, components) =>
             {
-                if (entity.gameObject) return false;
+                if (!entity.Equals(null)) return false;
                 components.ForEach(component => this.componentToTypes.Remove(component));
                 return true;
             });
