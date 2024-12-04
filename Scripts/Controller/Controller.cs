@@ -13,6 +13,10 @@ namespace UniT.Entities.Controller
 
         protected TComponent Component { get; private set; } = default!;
 
+        protected IEntityManager Manager => this.Component.Manager;
+
+        protected IEntity Entity => this.Component.Entity;
+
         protected virtual void OnInstantiate() { }
 
         protected virtual void OnSpawn() { }
