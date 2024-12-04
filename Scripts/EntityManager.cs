@@ -5,9 +5,6 @@ namespace UniT.Entities
     using System.Collections.Generic;
     using System.Linq;
     using UniT.DI;
-    using UniT.Entities.Component;
-    using UniT.Entities.Controller;
-    using UniT.Entities.Entity;
     using UniT.Extensions;
     using UniT.Logging;
     using UniT.Pooling;
@@ -165,12 +162,6 @@ namespace UniT.Entities
                 component.Container = this.container;
                 component.Manager   = this;
                 component.Entity    = entity;
-                if (component is IHasController owner)
-                {
-                    var controller = (IController)this.container.Instantiate(owner.ControllerType);
-                    controller.Owner = owner;
-                    owner.Controller = controller;
-                }
             });
             components.ForEach(component => component.OnInstantiate());
         }

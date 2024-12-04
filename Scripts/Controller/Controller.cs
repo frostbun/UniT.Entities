@@ -1,10 +1,22 @@
 ﻿#nullable enable
 namespace UniT.Entities.Controller
 {
-    public abstract class Controller<TOwner> : IController where TOwner : IHasController
+    public abstract class Controller<TComponent> : IController where TComponent : IComponent
     {
-        IHasController IController.Owner { set => this.Owner = (TOwner)value; }
+        IComponent IController.Component { set => this.Component = (TComponent)value; }
 
-        protected TOwner Owner { get; private set; } = default!;
+        void IController.OnInstantiate() => this.OnInstantiate();
+
+        void IController.OnSpawn() => this.OnSpawn();
+
+        void IController.OnRecycle() => this.OnRecycle();
+
+        protected TComponent Component { get; private set; } = default!;
+
+        protected virtual void OnInstantiate() { }
+
+        protected virtual void OnSpawn() { }
+
+        protected virtual void OnRecycle() { }
     }
 }

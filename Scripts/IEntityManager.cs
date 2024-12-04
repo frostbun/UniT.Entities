@@ -3,7 +3,6 @@ namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
-    using UniT.Entities.Entity;
     using UniT.Extensions;
     using UnityEngine;
     #if UNIT_UNITASK

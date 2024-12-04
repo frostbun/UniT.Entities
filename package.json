@@ -2,7 +2,7 @@
   "name": "com.frostbun.unit.entities",
   "displayName": "UniT Entities",
   "description": "Entity Manager for Unity",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "unity": "2022.3",
   "license": "MIT",
   "author": {
@@ -13,7 +13,7 @@
   "dependencies": {
     "com.frostbun.unit.extensions": "1.0.51",
     "com.frostbun.unit.logging": "1.0.7",
-    "com.frostbun.unit.pooling": "1.0.10",
+    "com.frostbun.unit.pooling": "1.0.11",
     "com.frostbun.unit.di": "1.0.12"
   }
 }

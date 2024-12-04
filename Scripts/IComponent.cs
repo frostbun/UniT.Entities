@@ -1,9 +1,8 @@
 ﻿#nullable enable
-namespace UniT.Entities.Component
+namespace UniT.Entities
 {
     using System.Diagnostics.CodeAnalysis;
     using UniT.DI;
-    using UniT.Entities.Entity;
     using UnityEngine;
 
     public interface IComponent

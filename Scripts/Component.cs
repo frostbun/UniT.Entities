@@ -1,9 +1,8 @@
 ﻿#nullable enable
-namespace UniT.Entities.Component
+namespace UniT.Entities
 {
     using System.Diagnostics.CodeAnalysis;
     using UniT.DI;
-    using UniT.Entities.Entity;
     using UniT.Extensions;
 
     public abstract class Component : BetterMonoBehavior, IComponent
@@ -34,11 +33,17 @@ namespace UniT.Entities.Component
 
         #region Extensions
 
+        #region Self
+
         public T? GetComponentOrDefault<T>() => base.GetComponent<T>();
 
         public new T GetComponent<T>() => this.GetComponentOrThrow<T>();
 
         public bool HasComponent<T>() => UnityExtensions.HasComponent<T>(this);
+
+        #endregion
+
+        #region Children
 
         public T? GetComponentInChildrenOrDefault<T>(bool includeInactive = false) => base.GetComponentInChildren<T>(includeInactive);
 
@@ -48,6 +53,10 @@ namespace UniT.Entities.Component
 
         public bool TryGetComponentInChildren<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => UnityExtensions.TryGetComponentInChildren(this, out component, includeInactive);
 
+        #endregion
+
+        #region Parent
+
         public T? GetComponentInParentOrDefault<T>(bool includeInactive = false) => base.GetComponentInParent<T>(includeInactive);
 
         public new T GetComponentInParent<T>(bool includeInactive = false) => this.GetComponentInParentOrThrow<T>(includeInactive);
@@ -55,6 +64,8 @@ namespace UniT.Entities.Component
         public bool HasComponentInParent<T>(bool includeInactive = false) => UnityExtensions.HasComponentInParent<T>(this, includeInactive);
 
         public bool TryGetComponentInParent<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => UnityExtensions.TryGetComponentInParent(this, out component, includeInactive);
+
+        #endregion
 
         #endregion
     }

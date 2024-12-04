@@ -1,8 +1,6 @@
 #nullable enable
-namespace UniT.Entities.Entity
+namespace UniT.Entities
 {
-    using UniT.Entities.Component;
-
     public interface IEntity : IComponent
     {
     }
