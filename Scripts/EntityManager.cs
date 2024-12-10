@@ -91,7 +91,7 @@ namespace UniT.Entities
 
         void IEntityManager.Recycle(IEntity entity)
         {
-            this.spawnedEntities.Remove(entity);
+            if (!this.spawnedEntities.Remove(entity)) throw new InvalidOperationException($"{entity.gameObject.name} was not spawned from {nameof(EntityManager)}");
             this.OnRecycle(entity);
             this.objectPoolManager.Recycle(entity.gameObject);
         }
