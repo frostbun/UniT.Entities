@@ -46,9 +46,9 @@ namespace UniT.Entities
 
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
-        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
+        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent, spawnInWorldSpace);
 
-        public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithParams<TParams> => this.Spawn<TEntity, TParams>(typeof(TEntity).GetKey(), @params, position, rotation, parent);
+        public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams<TParams> => this.Spawn<TEntity, TParams>(typeof(TEntity).GetKey(), @params, position, rotation, parent, spawnInWorldSpace);
 
         public void RecycleAll<TEntity>() where TEntity : IEntity => this.RecycleAll(typeof(TEntity).GetKey());
 
