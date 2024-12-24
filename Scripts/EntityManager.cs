@@ -26,10 +26,10 @@ namespace UniT.Entities
         private readonly IObjectPoolManager   objectPoolManager;
         private readonly ILogger              logger;
 
-        private readonly Dictionary<IEntity, IReadOnlyList<IComponent>> entities         = new Dictionary<IEntity, IReadOnlyList<IComponent>>();
-        private readonly Dictionary<IComponent, IReadOnlyList<Type>>    componentToTypes = new Dictionary<IComponent, IReadOnlyList<Type>>();
-        private readonly Dictionary<Type, HashSet<IComponent>>          typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
-        private readonly Dictionary<IEntity, object>                    spawnedEntities  = new Dictionary<IEntity, object>();
+        private readonly Dictionary<IEntity, IReadOnlyList<IComponent>> entityToComponents      = new Dictionary<IEntity, IReadOnlyList<IComponent>>();
+        private readonly Dictionary<IComponent, IReadOnlyList<Type>>    componentToTypes        = new Dictionary<IComponent, IReadOnlyList<Type>>();
+        private readonly Dictionary<Type, HashSet<IComponent>>          typeToSpawnedComponents = new Dictionary<Type, HashSet<IComponent>>();
+        private readonly Dictionary<IEntity, object>                    spawnedEntities         = new Dictionary<IEntity, object>();
 
         [Preserve]
         public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
@@ -37,6 +37,7 @@ namespace UniT.Entities
             this.container                       =  container;
             this.objectPoolManager               =  objectPoolManager;
             this.objectPoolManager.OnInstantiate += this.OnInstantiate;
+            this.objectPoolManager.OnCleanup     += this.OnCleanup;
             this.logger                          =  loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
@@ -111,34 +112,28 @@ namespace UniT.Entities
         void IEntityManager.Cleanup(IEntity prefab, int retainCount)
         {
             this.objectPoolManager.Cleanup(prefab.gameObject, retainCount);
-            this.OnCleanup();
         }
 
         void IEntityManager.Cleanup(string key, int retainCount)
         {
             this.objectPoolManager.Cleanup(key, retainCount);
-            this.OnCleanup();
         }
 
         void IEntityManager.Unload(IEntity prefab)
         {
             this.OnRecycleAll(prefab);
-            this.objectPoolManager.RecycleAll(prefab.gameObject);
             this.objectPoolManager.Unload(prefab.gameObject);
-            this.OnCleanup();
         }
 
         void IEntityManager.Unload(string key)
         {
             this.OnRecycleAll(key);
-            this.objectPoolManager.RecycleAll(key);
             this.objectPoolManager.Unload(key);
-            this.OnCleanup();
         }
 
         IEnumerable<T> IEntityManager.Query<T>()
         {
-            return this.typeToComponents.GetOrDefault(typeof(T))?.Cast<T>() ?? Enumerable.Empty<T>();
+            return this.typeToSpawnedComponents.GetOrDefault(typeof(T))?.Cast<T>() ?? Enumerable.Empty<T>();
         }
 
         #endregion
@@ -149,7 +144,7 @@ namespace UniT.Entities
         {
             if (!instance.TryGetComponent<IEntity>(out var entity)) return;
             var components = entity.GetComponentsInChildren<IComponent>();
-            this.entities.Add(entity, components);
+            this.entityToComponents.Add(entity, components);
             components.ForEach(component =>
             {
                 this.componentToTypes.Add(
@@ -168,14 +163,14 @@ namespace UniT.Entities
 
         private void OnSpawn(IEntity entity)
         {
-            this.entities[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToComponents.GetOrAdd(type).Add(component)));
-            this.entities[entity].ForEach(component => component.OnSpawn());
+            this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents.GetOrAdd(type).Add(component)));
+            this.entityToComponents[entity].ForEach(component => component.OnSpawn());
         }
 
         private void OnRecycle(IEntity entity)
         {
-            this.entities[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToComponents[type].Remove(component)));
-            this.entities[entity].ForEach(component => component.OnRecycle());
+            this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents[type].Remove(component)));
+            this.entityToComponents[entity].ForEach(component => component.OnRecycle());
         }
 
         private void OnRecycleAll(object obj)
@@ -188,14 +183,12 @@ namespace UniT.Entities
             });
         }
 
-        private void OnCleanup()
+        private void OnCleanup(GameObject instance)
         {
-            this.entities.RemoveWhere((entity, components) =>
-            {
-                if (!entity.Equals(null)) return false;
-                components.ForEach(component => this.componentToTypes.Remove(component));
-                return true;
-            });
+            if (!instance.TryGetComponent<IEntity>(out var entity)) return;
+            this.entityToComponents.Remove(entity, out var components);
+            this.componentToTypes.RemoveRange(components);
+            components.ForEach(component => component.OnCleanup());
         }
 
         #endregion

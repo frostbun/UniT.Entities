@@ -18,16 +18,20 @@ namespace UniT.Entities
 
         public IEntity Entity { get; private set; } = null!;
 
-        void IComponent.OnInstantiate() => this.OnInstantiate();
+        void IComponentLifecycle.OnInstantiate() => this.OnInstantiate();
 
-        void IComponent.OnSpawn() => this.OnSpawn();
+        void IComponentLifecycle.OnSpawn() => this.OnSpawn();
 
-        void IComponent.OnRecycle() => this.OnRecycle();
+        void IComponentLifecycle.OnRecycle() => this.OnRecycle();
+
+        void IComponentLifecycle.OnCleanup() => this.OnCleanup();
 
         protected virtual void OnInstantiate() { }
 
         protected virtual void OnSpawn() { }
 
         protected virtual void OnRecycle() { }
+
+        protected virtual void OnCleanup() { }
     }
 }

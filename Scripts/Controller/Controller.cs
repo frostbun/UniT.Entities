@@ -13,23 +13,27 @@ namespace UniT.Entities.Controller
     {
         IComponent IController.Component { set => this.Component = (TComponent)value; }
 
-        void IController.OnInstantiate() => this.OnInstantiate();
-
-        void IController.OnSpawn() => this.OnSpawn();
-
-        void IController.OnRecycle() => this.OnRecycle();
-
         protected TComponent Component { get; private set; } = default!;
 
         protected IEntityManager Manager => this.Component.Manager;
 
         protected IEntity Entity => this.Component.Entity;
 
+        void IComponentLifecycle.OnInstantiate() => this.OnInstantiate();
+
+        void IComponentLifecycle.OnSpawn() => this.OnSpawn();
+
+        void IComponentLifecycle.OnRecycle() => this.OnRecycle();
+
+        void IComponentLifecycle.OnCleanup() => this.OnCleanup();
+
         protected virtual void OnInstantiate() { }
 
         protected virtual void OnSpawn() { }
 
         protected virtual void OnRecycle() { }
+
+        protected virtual void OnCleanup() { }
 
         #region Extensions
 
