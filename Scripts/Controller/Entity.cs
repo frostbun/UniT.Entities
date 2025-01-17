@@ -3,7 +3,7 @@ namespace UniT.Entities.Controller
 {
     using System;
 
-    public abstract class Entity<TController> : Entity, IComponentLifecycle where TController : IController
+    public abstract class Entity<TController> : Entity, IComponentWithController where TController : IController
     {
         protected virtual Type ControllerType => typeof(TController);
 

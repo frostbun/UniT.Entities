@@ -9,7 +9,7 @@ namespace UniT.Entities.Controller
     using System.Collections.Generic;
     #endif
 
-    public abstract class Controller<TComponent> : IController where TComponent : IComponent
+    public abstract class Controller<TComponent> : IController where TComponent : IComponentWithController
     {
         IComponent IController.Component { set => this.Component = (TComponent)value; }
 
