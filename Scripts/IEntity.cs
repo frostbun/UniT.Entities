@@ -9,8 +9,8 @@ namespace UniT.Entities
     {
     }
 
-    public interface IEntityWithParams<in TParams> : IEntity
+    public interface IEntityWithParams : IEntity
     {
-        public TParams Params { set; }
+        public object Params { set; }
     }
 }

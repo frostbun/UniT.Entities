@@ -13,10 +13,10 @@ namespace UniT.Entities
     {
     }
 
-    public abstract class Entity<TParams> : BaseEntity, IEntityWithParams<TParams>
+    public abstract class Entity<TParams> : BaseEntity, IEntityWithParams
     {
-        TParams IEntityWithParams<TParams>.Params { set => this.Params = value; }
+        object IEntityWithParams.Params { set => this.Params = (TParams)value; }
 
-        public TParams Params { get; private set; } = default!;
+        protected TParams Params { get; private set; } = default!;
     }
 }

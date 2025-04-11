@@ -6,11 +6,9 @@ namespace UniT.Entities
     using System.Linq;
     using UniT.DI;
     using UniT.Extensions;
-    using UniT.Logging;
     using UniT.Pooling;
     using UnityEngine;
     using UnityEngine.Scripting;
-    using ILogger = UniT.Logging.ILogger;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
@@ -24,27 +22,31 @@ namespace UniT.Entities
 
         private readonly IDependencyContainer container;
         private readonly IObjectPoolManager   objectPoolManager;
-        private readonly ILogger              logger;
 
+        private readonly Dictionary<GameObject, IEntity>                objToEntity             = new Dictionary<GameObject, IEntity>();
         private readonly Dictionary<IEntity, IReadOnlyList<IComponent>> entityToComponents      = new Dictionary<IEntity, IReadOnlyList<IComponent>>();
         private readonly Dictionary<IComponent, IReadOnlyList<Type>>    componentToTypes        = new Dictionary<IComponent, IReadOnlyList<Type>>();
         private readonly Dictionary<Type, HashSet<IComponent>>          typeToSpawnedComponents = new Dictionary<Type, HashSet<IComponent>>();
-        private readonly Dictionary<IEntity, object>                    spawnedEntities         = new Dictionary<IEntity, object>();
 
         [Preserve]
-        public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
+        public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager)
         {
-            this.container                       =  container;
-            this.objectPoolManager               =  objectPoolManager;
-            this.objectPoolManager.OnInstantiate += this.OnInstantiate;
-            this.objectPoolManager.OnCleanup     += this.OnCleanup;
-            this.logger                          =  loggerManager.GetLogger(this);
-            this.logger.Debug("Constructed");
+            this.container                      =  container;
+            this.objectPoolManager              =  objectPoolManager;
+            this.objectPoolManager.Instantiated += this.OnInstantiated;
+            this.objectPoolManager.Spawned      += this.OnSpawned;
+            this.objectPoolManager.Recycled     += this.OnRecycled;
+            this.objectPoolManager.CleanedUp    += this.OnCleanedUp;
         }
 
         #endregion
 
         #region Public
+
+        event Action<IEntity> IEntityManager.Instantiated { add => this.instantiated += value; remove => this.instantiated -= value; }
+        event Action<IEntity> IEntityManager.Spawned      { add => this.spawned += value;      remove => this.spawned -= value; }
+        event Action<IEntity> IEntityManager.Recycled     { add => this.recycled += value;     remove => this.recycled -= value; }
+        event Action<IEntity> IEntityManager.CleanedUp    { add => this.cleanedUp += value;    remove => this.cleanedUp -= value; }
 
         void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
 
@@ -58,54 +60,38 @@ namespace UniT.Entities
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
         {
-            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
-            this.OnSpawn(entity);
-            this.spawnedEntities.Add(entity, prefab);
-            return entity;
+            return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, object @params, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
         {
-            var entity = this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
-            entity.Params = @params;
-            this.OnSpawn(entity);
-            this.spawnedEntities.Add(entity, prefab);
-            return entity;
+            this.nextParams = @params;
+            return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
         }
 
         TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
         {
-            var entity = this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
-            this.OnSpawn(entity);
-            this.spawnedEntities.Add(entity, key);
-            return entity;
+            return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(string key, object @params, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
         {
-            var entity = this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
-            entity.Params = @params;
-            this.OnSpawn(entity);
-            this.spawnedEntities.Add(entity, key);
-            return entity;
+            this.nextParams = @params;
+            return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
         }
 
         void IEntityManager.Recycle(IEntity entity)
         {
-            if (!this.spawnedEntities.Remove(entity)) throw new InvalidOperationException($"{entity.gameObject.name} was not spawned from {nameof(EntityManager)}");
-            this.OnRecycle(entity);
             this.objectPoolManager.Recycle(entity.gameObject);
         }
 
         void IEntityManager.RecycleAll(IEntity prefab)
         {
-            this.OnRecycleAll(prefab);
             this.objectPoolManager.RecycleAll(prefab.gameObject);
         }
 
         void IEntityManager.RecycleAll(string key)
         {
-            this.OnRecycleAll(key);
             this.objectPoolManager.RecycleAll(key);
         }
 
@@ -121,13 +107,11 @@ namespace UniT.Entities
 
         void IEntityManager.Unload(IEntity prefab)
         {
-            this.OnRecycleAll(prefab);
             this.objectPoolManager.Unload(prefab.gameObject);
         }
 
         void IEntityManager.Unload(string key)
         {
-            this.OnRecycleAll(key);
             this.objectPoolManager.Unload(key);
         }
 
@@ -140,9 +124,17 @@ namespace UniT.Entities
 
         #region Private
 
-        private void OnInstantiate(GameObject instance)
+        private Action<IEntity>? instantiated;
+        private Action<IEntity>? spawned;
+        private Action<IEntity>? recycled;
+        private Action<IEntity>? cleanedUp;
+
+        private object nextParams = null!;
+
+        private void OnInstantiated(GameObject instance)
         {
             if (!instance.TryGetComponent<IEntity>(out var entity)) return;
+            this.objToEntity.Add(instance, entity);
             var components = entity.GetComponentsInChildren<IComponent>();
             this.entityToComponents.Add(entity, components);
             components.ForEach(component =>
@@ -159,36 +151,36 @@ namespace UniT.Entities
                 component.Entity    = entity;
             });
             components.ForEach(component => component.OnInstantiate());
+            this.instantiated?.Invoke(entity);
         }
 
-        private void OnSpawn(IEntity entity)
+        private void OnSpawned(GameObject instance)
         {
+            if (!this.objToEntity.TryGetValue(instance, out var entity)) return;
+            if (entity is IEntityWithParams entityWithParams)
+            {
+                entityWithParams.Params = this.nextParams;
+            }
             this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents.GetOrAdd(type).Add(component)));
             this.entityToComponents[entity].ForEach(component => component.OnSpawn());
+            this.spawned?.Invoke(entity);
         }
 
-        private void OnRecycle(IEntity entity)
+        private void OnRecycled(GameObject instance)
         {
+            if (!this.objToEntity.TryGetValue(instance, out var entity)) return;
             this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents[type].Remove(component)));
             this.entityToComponents[entity].ForEach(component => component.OnRecycle());
+            this.recycled?.Invoke(entity);
         }
 
-        private void OnRecycleAll(object obj)
+        private void OnCleanedUp(GameObject instance)
         {
-            this.spawnedEntities.RemoveWhere((entity, key) =>
-            {
-                if (!key.Equals(obj)) return false;
-                this.OnRecycle(entity);
-                return true;
-            });
-        }
-
-        private void OnCleanup(GameObject instance)
-        {
-            if (!instance.TryGetComponent<IEntity>(out var entity)) return;
+            if (!this.objToEntity.Remove(instance, out var entity)) return;
             this.entityToComponents.Remove(entity, out var components);
             this.componentToTypes.RemoveRange(components);
             components.ForEach(component => component.OnCleanup());
+            this.cleanedUp?.Invoke(entity);
         }
 
         #endregion
