@@ -171,6 +171,10 @@ namespace UniT.Entities
             if (!this.objToEntity.TryGetValue(instance, out var entity)) return;
             this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents[type].Remove(component)));
             this.entityToComponents[entity].ForEach(component => component.OnRecycle());
+            if (entity is IEntityWithParams entityWithParams)
+            {
+                entityWithParams.Params = null!;
+            }
             this.recycled?.Invoke(entity);
         }
 
