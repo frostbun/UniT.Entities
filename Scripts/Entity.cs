@@ -15,7 +15,8 @@ namespace UniT.Entities
 
     public abstract class Entity<TParams> : BaseEntity, IEntityWithParams
     {
-        object IEntityWithParams.Params { set => this.Params = (TParams)value; }
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        object IEntityWithParams.Params { set => this.Params = value is null ? default! : (TParams)value; }
 
         protected TParams Params { get; private set; } = default!;
     }
