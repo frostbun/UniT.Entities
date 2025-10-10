@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace UniT.Entities
 {
+    using System;
     using UnityEngine;
 
     [DisallowMultipleComponent]
@@ -9,14 +10,21 @@ namespace UniT.Entities
         public void Recycle() => this.Manager.Recycle(this);
     }
 
-    public abstract class Entity : BaseEntity, IEntityWithoutParams
+    public class Entity : BaseEntity, IEntityWithoutParams
     {
     }
 
     public abstract class Entity<TParams> : BaseEntity, IEntityWithParams
     {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        object IEntityWithParams.Params { set => this.Params = value is null ? default! : (TParams)value; }
+        object IEntityWithParams.Params
+        {
+            set => this.Params = value switch
+            {
+                null            => default!,
+                TParams @params => @params,
+                _               => throw new InvalidCastException($"{this.GetType().Name} expected {typeof(TParams)}, got {value.GetType().Name}"),
+            };
+        }
 
         protected TParams Params { get; private set; } = default!;
     }
