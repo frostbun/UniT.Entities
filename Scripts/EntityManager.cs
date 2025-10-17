@@ -43,10 +43,10 @@ namespace UniT.Entities
 
         #region Public
 
-        event Action<IEntity> IEntityManager.Instantiated { add => this.instantiated += value; remove => this.instantiated -= value; }
-        event Action<IEntity> IEntityManager.Spawned      { add => this.spawned += value;      remove => this.spawned -= value; }
-        event Action<IEntity> IEntityManager.Recycled     { add => this.recycled += value;     remove => this.recycled -= value; }
-        event Action<IEntity> IEntityManager.CleanedUp    { add => this.cleanedUp += value;    remove => this.cleanedUp -= value; }
+        event Action<IEntity, IReadOnlyList<IComponent>> IEntityManager.Instantiated { add => this.instantiated += value; remove => this.instantiated -= value; }
+        event Action<IEntity, IReadOnlyList<IComponent>> IEntityManager.Spawned      { add => this.spawned += value;      remove => this.spawned -= value; }
+        event Action<IEntity, IReadOnlyList<IComponent>> IEntityManager.Recycled     { add => this.recycled += value;     remove => this.recycled -= value; }
+        event Action<IEntity, IReadOnlyList<IComponent>> IEntityManager.CleanedUp    { add => this.cleanedUp += value;    remove => this.cleanedUp -= value; }
 
         void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
 
@@ -124,10 +124,10 @@ namespace UniT.Entities
 
         #region Private
 
-        private Action<IEntity>? instantiated;
-        private Action<IEntity>? spawned;
-        private Action<IEntity>? recycled;
-        private Action<IEntity>? cleanedUp;
+        private Action<IEntity, IReadOnlyList<IComponent>>? instantiated;
+        private Action<IEntity, IReadOnlyList<IComponent>>? spawned;
+        private Action<IEntity, IReadOnlyList<IComponent>>? recycled;
+        private Action<IEntity, IReadOnlyList<IComponent>>? cleanedUp;
 
         private object nextParams = null!;
 
@@ -151,7 +151,7 @@ namespace UniT.Entities
                 component.Entity    = entity;
             });
             components.ForEach(component => component.OnInstantiate());
-            this.instantiated?.Invoke(entity);
+            this.instantiated?.Invoke(entity, components);
         }
 
         private void OnSpawned(GameObject instance)
@@ -161,21 +161,23 @@ namespace UniT.Entities
             {
                 entityWithParams.Params = this.nextParams;
             }
-            this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents.GetOrAdd(type).Add(component)));
-            this.entityToComponents[entity].ForEach(component => component.OnSpawn());
-            this.spawned?.Invoke(entity);
+            var components = this.entityToComponents[entity];
+            components.ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents.GetOrAdd(type).Add(component)));
+            components.ForEach(component => component.OnSpawn());
+            this.spawned?.Invoke(entity, components);
         }
 
         private void OnRecycled(GameObject instance)
         {
             if (!this.objToEntity.TryGetValue(instance, out var entity)) return;
-            this.entityToComponents[entity].ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents[type].Remove(component)));
-            this.entityToComponents[entity].ForEach(component => component.OnRecycle());
+            var components = this.entityToComponents[entity];
+            components.ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents[type].Remove(component)));
+            components.ForEach(component => component.OnRecycle());
             if (entity is IEntityWithParams entityWithParams)
             {
                 entityWithParams.Params = null!;
             }
-            this.recycled?.Invoke(entity);
+            this.recycled?.Invoke(entity, components);
         }
 
         private void OnCleanedUp(GameObject instance)
@@ -184,7 +186,7 @@ namespace UniT.Entities
             this.entityToComponents.Remove(entity, out var components);
             this.componentToTypes.RemoveRange(components);
             components.ForEach(component => component.OnCleanup());
-            this.cleanedUp?.Invoke(entity);
+            this.cleanedUp?.Invoke(entity, components);
         }
 
         #endregion

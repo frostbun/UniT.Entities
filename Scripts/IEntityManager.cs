@@ -14,13 +14,13 @@ namespace UniT.Entities
 
     public interface IEntityManager
     {
-        public event Action<IEntity> Instantiated;
+        public event Action<IEntity, IReadOnlyList<IComponent>> Instantiated;
 
-        public event Action<IEntity> Spawned;
+        public event Action<IEntity, IReadOnlyList<IComponent>> Spawned;
 
-        public event Action<IEntity> Recycled;
+        public event Action<IEntity, IReadOnlyList<IComponent>> Recycled;
 
-        public event Action<IEntity> CleanedUp;
+        public event Action<IEntity, IReadOnlyList<IComponent>> CleanedUp;
 
         public void Load(IEntity prefab, int count = 1);
 
