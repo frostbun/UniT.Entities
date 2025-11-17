@@ -16,16 +16,18 @@ namespace UniT.Entities
 
     public abstract class Entity<TParams> : BaseEntity, IEntityWithParams
     {
+        private TParams? @params;
+
         object IEntityWithParams.Params
         {
-            set => this.Params = value switch
+            set => this.@params = value switch
             {
-                null            => default!,
+                null            => default,
                 TParams @params => @params,
                 _               => throw new InvalidCastException($"{this.GetType().Name} expected {typeof(TParams)}, got {value.GetType().Name}"),
             };
         }
 
-        protected TParams Params { get; private set; } = default!;
+        protected TParams Params => this.@params ?? throw new InvalidOperationException($"{this.name} not spawned or already recycled");
     }
 }
