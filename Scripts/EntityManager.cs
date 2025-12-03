@@ -58,23 +58,23 @@ namespace UniT.Entities
         IEnumerator IEntityManager.LoadAsync(string key, int count, Action? callback, IProgress<float>? progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
         #endif
 
-        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, object @params, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, object @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             this.nextParams = @params;
             return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(string key, object @params, Vector3 position, Quaternion rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(string key, object @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             this.nextParams = @params;
             return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();

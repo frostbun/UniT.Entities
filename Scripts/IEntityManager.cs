@@ -26,13 +26,13 @@ namespace UniT.Entities
 
         public void Load(string key, int count = 1);
 
-        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams;
+        public TEntity Spawn<TEntity>(TEntity prefab, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity>(TEntity prefab, object @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams;
+        public TEntity Spawn<TEntity>(TEntity prefab, object @params, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams;
 
-        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams;
+        public TEntity Spawn<TEntity>(string key, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity>(string key, object @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams;
+        public TEntity Spawn<TEntity>(string key, object @params, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams;
 
         public void Recycle(IEntity instance);
 
@@ -54,9 +54,9 @@ namespace UniT.Entities
 
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
-        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent, spawnInWorldSpace);
+        public TEntity Spawn<TEntity>(Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent, spawnInWorldSpace);
 
-        public TEntity Spawn<TEntity>(object @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), @params, position, rotation, parent, spawnInWorldSpace);
+        public TEntity Spawn<TEntity>(object @params, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), @params, position, rotation, parent, spawnInWorldSpace);
 
         public void RecycleAll<TEntity>() where TEntity : IEntity => this.RecycleAll(typeof(TEntity).GetKey());
 
