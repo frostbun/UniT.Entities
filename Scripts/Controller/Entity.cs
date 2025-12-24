@@ -37,7 +37,7 @@ namespace UniT.Entities.Controller
         }
     }
 
-    public abstract class Entity<TParams, TController> : Entities.Entity<TParams>, IComponentWithController where TController : IController
+    public abstract class Entity<TParams, TController> : Entities.Entity<TParams>, IComponentWithController where TController : IController where TParams : notnull
     {
         protected virtual Type ControllerType => typeof(TController);
 

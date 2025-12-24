@@ -50,12 +50,12 @@ namespace UniT.Entities
 
         void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
 
-        void IEntityManager.Load(string key, int count) => this.objectPoolManager.Load(key, count);
+        void IEntityManager.Load(object key, int count) => this.objectPoolManager.Load(key, count);
 
         #if UNIT_UNITASK
-        UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float>? progress, CancellationToken cancellationToken) => this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
+        UniTask IEntityManager.LoadAsync(object key, int count, IProgress<float>? progress, CancellationToken cancellationToken) => this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
         #else
-        IEnumerator IEntityManager.LoadAsync(string key, int count, Action? callback, IProgress<float>? progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
+        IEnumerator IEntityManager.LoadAsync(object key, int count, Action? callback, IProgress<float>? progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
         #endif
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
@@ -63,18 +63,18 @@ namespace UniT.Entities
             return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, object @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             this.nextParams = @params;
             return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity>(object key, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(string key, object @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(object key, TParams @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             this.nextParams = @params;
             return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
@@ -90,7 +90,7 @@ namespace UniT.Entities
             this.objectPoolManager.RecycleAll(prefab.gameObject);
         }
 
-        void IEntityManager.RecycleAll(string key)
+        void IEntityManager.RecycleAll(object key)
         {
             this.objectPoolManager.RecycleAll(key);
         }
@@ -100,7 +100,7 @@ namespace UniT.Entities
             this.objectPoolManager.Cleanup(prefab.gameObject, retainCount);
         }
 
-        void IEntityManager.Cleanup(string key, int retainCount)
+        void IEntityManager.Cleanup(object key, int retainCount)
         {
             this.objectPoolManager.Cleanup(key, retainCount);
         }
@@ -110,7 +110,7 @@ namespace UniT.Entities
             this.objectPoolManager.Unload(prefab.gameObject);
         }
 
-        void IEntityManager.Unload(string key)
+        void IEntityManager.Unload(object key)
         {
             this.objectPoolManager.Unload(key);
         }
@@ -175,7 +175,7 @@ namespace UniT.Entities
             components.ForEach(component => component.OnRecycle());
             if (entity is IEntityWithParams entityWithParams)
             {
-                entityWithParams.Params = null!;
+                entityWithParams.Params = null;
             }
             this.recycled?.Invoke(entity, components);
         }

@@ -1,6 +1,8 @@
 #nullable enable
 namespace UniT.Entities
 {
+    using System;
+
     public interface IEntity : IComponent
     {
     }
@@ -11,6 +13,21 @@ namespace UniT.Entities
 
     public interface IEntityWithParams : IEntity
     {
-        public object Params { set; }
+        public object? Params { set; }
+    }
+
+    public interface IEntityWithParams<in TParams> : IEntityWithParams where TParams : notnull
+    {
+        object? IEntityWithParams.Params
+        {
+            set => this.Params = value switch
+            {
+                null            => default,
+                TParams @params => @params,
+                _               => throw new InvalidCastException($"{this.GetType().Name} expected params of type {typeof(TParams)}, got {value.GetType().Name}"),
+            };
+        }
+
+        public new TParams? Params { set; }
     }
 }
