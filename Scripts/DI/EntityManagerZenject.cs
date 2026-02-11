@@ -2,7 +2,6 @@
 #nullable enable
 namespace UniT.Entities.DI
 {
-    using UniT.DI;
     using UniT.Logging.DI;
     using UniT.Pooling.DI;
     using Zenject;
