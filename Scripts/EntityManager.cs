@@ -23,10 +23,10 @@ namespace UniT.Entities
         private readonly IDependencyContainer container;
         private readonly IObjectPoolManager   objectPoolManager;
 
-        private readonly Dictionary<GameObject, IEntity>                objToEntity             = new Dictionary<GameObject, IEntity>();
-        private readonly Dictionary<IEntity, IReadOnlyList<IComponent>> entityToComponents      = new Dictionary<IEntity, IReadOnlyList<IComponent>>();
-        private readonly Dictionary<IComponent, IReadOnlyList<Type>>    componentToTypes        = new Dictionary<IComponent, IReadOnlyList<Type>>();
-        private readonly Dictionary<Type, HashSet<IComponent>>          typeToSpawnedComponents = new Dictionary<Type, HashSet<IComponent>>();
+        private readonly Dictionary<GameObject, IEntity>       objToEntity             = new Dictionary<GameObject, IEntity>();
+        private readonly Dictionary<IEntity, IComponent[]>     entityToComponents      = new Dictionary<IEntity, IComponent[]>();
+        private readonly Dictionary<IComponent, Type[]>        componentToTypes        = new Dictionary<IComponent, Type[]>();
+        private readonly Dictionary<Type, HashSet<IComponent>> typeToSpawnedComponents = new Dictionary<Type, HashSet<IComponent>>();
 
         [Preserve]
         public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager)
@@ -137,7 +137,7 @@ namespace UniT.Entities
             this.objToEntity.Add(instance, entity);
             var components = entity.GetComponentsInChildren<IComponent>();
             this.entityToComponents.Add(entity, components);
-            components.ForEach(component =>
+            foreach (var component in components.AsSpan())
             {
                 this.componentToTypes.Add(
                     component,
@@ -149,8 +149,8 @@ namespace UniT.Entities
                 component.Container = this.container;
                 component.Manager   = this;
                 component.Entity    = entity;
-            });
-            components.ForEach(component => component.OnInstantiate());
+            }
+            foreach (var component in components.AsSpan()) component.OnInstantiate();
             this.instantiated?.Invoke(entity, components);
         }
 
@@ -162,8 +162,14 @@ namespace UniT.Entities
                 entityWithParams.Params = this.nextParams;
             }
             var components = this.entityToComponents[entity];
-            components.ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents.GetOrAdd(type).Add(component)));
-            components.ForEach(component => component.OnSpawn());
+            foreach (var component in components.AsSpan())
+            {
+                foreach (var type in this.componentToTypes[component].AsSpan())
+                {
+                    this.typeToSpawnedComponents.GetOrAdd(type).Add(component);
+                }
+            }
+            foreach (var component in components.AsSpan()) component.OnSpawn();
             this.spawned?.Invoke(entity, components);
         }
 
@@ -171,8 +177,14 @@ namespace UniT.Entities
         {
             if (!this.objToEntity.TryGetValue(instance, out var entity)) return;
             var components = this.entityToComponents[entity];
-            components.ForEach(component => this.componentToTypes[component].ForEach(type => this.typeToSpawnedComponents[type].Remove(component)));
-            components.ForEach(component => component.OnRecycle());
+            foreach (var component in components.AsSpan())
+            {
+                foreach (var type in this.componentToTypes[component].AsSpan())
+                {
+                    this.typeToSpawnedComponents[type].Remove(component);
+                }
+            }
+            foreach (var component in components.AsSpan()) component.OnRecycle();
             if (entity is IEntityWithParams entityWithParams)
             {
                 entityWithParams.Params = null;
@@ -185,7 +197,7 @@ namespace UniT.Entities
             if (!this.objToEntity.Remove(instance, out var entity)) return;
             this.entityToComponents.Remove(entity, out var components);
             this.componentToTypes.RemoveRange(components);
-            components.ForEach(component => component.OnCleanup());
+            foreach (var component in components.AsSpan()) component.OnCleanup();
             this.cleanedUp?.Invoke(entity, components);
         }
 
