@@ -24,7 +24,9 @@ namespace UniT.Entities
 
         public void Load(IEntity prefab, int count = 1);
 
+        #if !UNITY_WEBGL
         public void Load(object key, int count = 1);
+        #endif
 
         public TEntity Spawn<TEntity>(TEntity prefab, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams;
 
@@ -52,7 +54,9 @@ namespace UniT.Entities
 
         #region Implicit Key
 
+        #if !UNITY_WEBGL
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
+        #endif
 
         public TEntity Spawn<TEntity>(Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent, spawnInWorldSpace);
 

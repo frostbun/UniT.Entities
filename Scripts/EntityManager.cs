@@ -50,7 +50,9 @@ namespace UniT.Entities
 
         void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
 
+        #if !UNITY_WEBGL
         void IEntityManager.Load(object key, int count) => this.objectPoolManager.Load(key, count);
+        #endif
 
         #if UNIT_UNITASK
         UniTask IEntityManager.LoadAsync(object key, int count, IProgress<float>? progress, CancellationToken cancellationToken) => this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
