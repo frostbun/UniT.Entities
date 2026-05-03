@@ -23,16 +23,17 @@ namespace UniT.Entities
         private readonly IDependencyContainer container;
         private readonly IObjectPoolManager   objectPoolManager;
 
-        private readonly Dictionary<GameObject, IEntity>       objToEntity             = new Dictionary<GameObject, IEntity>();
-        private readonly Dictionary<IEntity, IComponent[]>     entityToComponents      = new Dictionary<IEntity, IComponent[]>();
-        private readonly Dictionary<IComponent, Type[]>        componentToTypes        = new Dictionary<IComponent, Type[]>();
-        private readonly Dictionary<Type, HashSet<IComponent>> typeToSpawnedComponents = new Dictionary<Type, HashSet<IComponent>>();
+        private readonly Dictionary<GameObject, IEntity>       objToEntity             = new();
+        private readonly Dictionary<IEntity, IComponent[]>     entityToComponents      = new();
+        private readonly Dictionary<IComponent, Type[]>        componentToTypes        = new();
+        private readonly Dictionary<Type, HashSet<IComponent>> typeToSpawnedComponents = new();
 
         [Preserve]
         public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager)
         {
-            this.container                      =  container;
-            this.objectPoolManager              =  objectPoolManager;
+            this.container         = container;
+            this.objectPoolManager = objectPoolManager;
+
             this.objectPoolManager.Instantiated += this.OnInstantiated;
             this.objectPoolManager.Spawned      += this.OnSpawned;
             this.objectPoolManager.Recycled     += this.OnRecycled;
@@ -62,60 +63,39 @@ namespace UniT.Entities
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
-            return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
+            return this.objectPoolManager.Spawn<TEntity>(prefab.gameObject, position, rotation, parent, spawnInWorldSpace);
         }
 
         TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             this.nextParams = @params;
-            return this.objectPoolManager.Spawn(prefab.gameObject, position, rotation, parent, spawnInWorldSpace).GetComponent<TEntity>();
+            return this.objectPoolManager.Spawn<TEntity>(prefab.gameObject, position, rotation, parent, spawnInWorldSpace);
         }
 
         TEntity IEntityManager.Spawn<TEntity>(object key, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
-            return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
+            return this.objectPoolManager.Spawn<TEntity>(key, position, rotation, parent, spawnInWorldSpace);
         }
 
         TEntity IEntityManager.Spawn<TEntity, TParams>(object key, TParams @params, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {
             this.nextParams = @params;
-            return this.objectPoolManager.Spawn(key, position, rotation, parent, spawnInWorldSpace).GetComponentOrThrow<TEntity>();
+            return this.objectPoolManager.Spawn<TEntity>(key, position, rotation, parent, spawnInWorldSpace);
         }
 
-        void IEntityManager.Recycle(IEntity entity)
-        {
-            this.objectPoolManager.Recycle(entity.gameObject);
-        }
+        void IEntityManager.Recycle(IEntity entity) => this.objectPoolManager.Recycle(entity.gameObject);
 
-        void IEntityManager.RecycleAll(IEntity prefab)
-        {
-            this.objectPoolManager.RecycleAll(prefab.gameObject);
-        }
+        void IEntityManager.RecycleAll(IEntity prefab) => this.objectPoolManager.RecycleAll(prefab.gameObject);
 
-        void IEntityManager.RecycleAll(object key)
-        {
-            this.objectPoolManager.RecycleAll(key);
-        }
+        void IEntityManager.RecycleAll(object key) => this.objectPoolManager.RecycleAll(key);
 
-        void IEntityManager.Cleanup(IEntity prefab, int retainCount)
-        {
-            this.objectPoolManager.Cleanup(prefab.gameObject, retainCount);
-        }
+        void IEntityManager.Cleanup(IEntity prefab, int retainCount) => this.objectPoolManager.Cleanup(prefab.gameObject, retainCount);
 
-        void IEntityManager.Cleanup(object key, int retainCount)
-        {
-            this.objectPoolManager.Cleanup(key, retainCount);
-        }
+        void IEntityManager.Cleanup(object key, int retainCount) => this.objectPoolManager.Cleanup(key, retainCount);
 
-        void IEntityManager.Unload(IEntity prefab)
-        {
-            this.objectPoolManager.Unload(prefab.gameObject);
-        }
+        void IEntityManager.Unload(IEntity prefab) => this.objectPoolManager.Unload(prefab.gameObject);
 
-        void IEntityManager.Unload(object key)
-        {
-            this.objectPoolManager.Unload(key);
-        }
+        void IEntityManager.Unload(object key) => this.objectPoolManager.Unload(key);
 
         IEnumerable<T> IEntityManager.Query<T>()
         {

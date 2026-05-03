@@ -3,6 +3,7 @@ namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using UniT.Extensions;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -55,17 +56,23 @@ namespace UniT.Entities
         #region Implicit Key
 
         #if !UNITY_WEBGL
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
         #endif
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TEntity Spawn<TEntity>(Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent, spawnInWorldSpace);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithParams<TParams> where TParams : notnull => this.Spawn<TEntity, TParams>(typeof(TEntity).GetKey(), @params, position, rotation, parent, spawnInWorldSpace);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RecycleAll<TEntity>() where TEntity : IEntity => this.RecycleAll(typeof(TEntity).GetKey());
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Cleanup<TEntity>(int retainCount = 1) where TEntity : IEntity => this.Cleanup(typeof(TEntity).GetKey(), retainCount);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unload<TEntity>() where TEntity : IEntity => this.Unload(typeof(TEntity).GetKey());
 
         #endregion
@@ -75,10 +82,12 @@ namespace UniT.Entities
         #if UNIT_UNITASK
         public UniTask LoadAsync(object key, int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
         #else
         public IEnumerator LoadAsync(object key, int count = 1, Action? callback = null, IProgress<float>? progress = null);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator LoadAsync<TEntity>(int count = 1, Action? callback = null, IProgress<float>? progress = null) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, callback, progress);
         #endif
 

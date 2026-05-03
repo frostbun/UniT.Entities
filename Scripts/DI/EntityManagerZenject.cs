@@ -2,7 +2,6 @@
 #nullable enable
 namespace UniT.Entities.DI
 {
-    using UniT.Logging.DI;
     using UniT.Pooling.DI;
     using Zenject;
 
@@ -12,7 +11,6 @@ namespace UniT.Entities.DI
         {
             if (container.HasBinding<IEntityManager>()) return;
             container.BindDependencyContainer();
-            container.BindLoggerManager();
             container.BindObjectPoolManager();
             container.BindInterfacesTo<EntityManager>().AsSingle();
         }
