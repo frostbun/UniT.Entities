@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace UniT.Entities.Controller
 {
     using System.Diagnostics.CodeAnalysis;
