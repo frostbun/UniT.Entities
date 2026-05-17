@@ -6,9 +6,11 @@ namespace UniT.Entities
     using System.Linq;
     using UniT.DI;
     using UniT.Extensions;
+    using UniT.Logging;
     using UniT.Pooling;
     using UnityEngine;
     using UnityEngine.Scripting;
+    using ILogger = UniT.Logging.ILogger;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
@@ -22,22 +24,28 @@ namespace UniT.Entities
 
         private readonly IDependencyContainer container;
         private readonly IObjectPoolManager   objectPoolManager;
+        private readonly ILogger              logger;
 
+        private readonly HashSet<object>                       trackingKeys            = new();
+        private readonly HashSet<GameObject>                   trackingPrefabs         = new();
         private readonly Dictionary<GameObject, IEntity>       objToEntity             = new();
         private readonly Dictionary<IEntity, IComponent[]>     entityToComponents      = new();
         private readonly Dictionary<IComponent, Type[]>        componentToTypes        = new();
         private readonly Dictionary<Type, HashSet<IComponent>> typeToSpawnedComponents = new();
 
         [Preserve]
-        public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager)
+        public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
         {
             this.container         = container;
             this.objectPoolManager = objectPoolManager;
+            this.logger            = loggerManager.GetLogger(this);
 
             this.objectPoolManager.Instantiated += this.OnInstantiated;
             this.objectPoolManager.Spawned      += this.OnSpawned;
             this.objectPoolManager.Recycled     += this.OnRecycled;
             this.objectPoolManager.CleanedUp    += this.OnCleanedUp;
+
+            this.logger.Debug("Constructed");
         }
 
         #endregion
@@ -49,16 +57,32 @@ namespace UniT.Entities
         event Action<IEntity, IReadOnlyList<IComponent>> IEntityManager.Recycled     { add => this.recycled += value;     remove => this.recycled -= value; }
         event Action<IEntity, IReadOnlyList<IComponent>> IEntityManager.CleanedUp    { add => this.cleanedUp += value;    remove => this.cleanedUp -= value; }
 
-        void IEntityManager.Load(IEntity prefab, int count) => this.objectPoolManager.Load(prefab.gameObject, count);
+        void IEntityManager.Load(IEntity prefab, int count)
+        {
+            this.trackingPrefabs.Add(prefab.gameObject);
+            this.objectPoolManager.Load(prefab.gameObject, count);
+        }
 
         #if !UNITY_WEBGL
-        void IEntityManager.Load(object key, int count) => this.objectPoolManager.Load(key, count);
+        void IEntityManager.Load(object key, int count)
+        {
+            this.trackingKeys.Add(key);
+            this.objectPoolManager.Load(key, count);
+        }
         #endif
 
         #if UNIT_UNITASK
-        UniTask IEntityManager.LoadAsync(object key, int count, IProgress<float>? progress, CancellationToken cancellationToken) => this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
+        UniTask IEntityManager.LoadAsync(object key, int count, IProgress<float>? progress, CancellationToken cancellationToken)
+        {
+            this.trackingKeys.Add(key);
+            return this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
+        }
         #else
-        IEnumerator IEntityManager.LoadAsync(object key, int count, Action? callback, IProgress<float>? progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
+        IEnumerator IEntityManager.LoadAsync(object key, int count, Action? callback, IProgress<float>? progress)
+        {
+            this.trackingKeys.Add(key);
+            return this.objectPoolManager.LoadAsync(key, count, callback, progress);
+        }
         #endif
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
@@ -93,9 +117,17 @@ namespace UniT.Entities
 
         void IEntityManager.Cleanup(object key, int retainCount) => this.objectPoolManager.Cleanup(key, retainCount);
 
-        void IEntityManager.Unload(IEntity prefab) => this.objectPoolManager.Unload(prefab.gameObject);
+        void IEntityManager.Unload(IEntity prefab)
+        {
+            this.trackingPrefabs.Remove(prefab.gameObject);
+            this.objectPoolManager.Unload(prefab.gameObject);
+        }
 
-        void IEntityManager.Unload(object key) => this.objectPoolManager.Unload(key);
+        void IEntityManager.Unload(object key)
+        {
+            this.trackingKeys.Remove(key);
+            this.objectPoolManager.Unload(key);
+        }
 
         IEnumerable<T> IEntityManager.Query<T>()
         {
@@ -181,6 +213,28 @@ namespace UniT.Entities
             this.componentToTypes.RemoveRange(components);
             foreach (var component in components.AsSpan()) component.OnCleanup();
             this.cleanedUp?.Invoke(entity, components);
+        }
+
+        #endregion
+
+        #region Finalizer
+
+        private void Dispose()
+        {
+            this.trackingKeys.Clear(this.objectPoolManager.Unload);
+            this.trackingPrefabs.Clear(this.objectPoolManager.Unload);
+        }
+
+        void IDisposable.Dispose()
+        {
+            this.Dispose();
+            this.logger.Debug("Disposed");
+        }
+
+        ~EntityManager()
+        {
+            this.Dispose();
+            this.logger.Debug("Finalized");
         }
 
         #endregion

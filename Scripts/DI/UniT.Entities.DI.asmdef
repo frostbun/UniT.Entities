@@ -2,6 +2,7 @@
   "name": "UniT.Entities.DI",
   "rootNamespace": "UniT.Entities.DI",
   "references": [
+    "UniT.Logging.DI",
     "UniT.Pooling.DI",
     "UniT.Entities",
     "UniT.DI",

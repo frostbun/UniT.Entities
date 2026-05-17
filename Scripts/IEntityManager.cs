@@ -13,7 +13,7 @@ namespace UniT.Entities
     using System.Collections;
     #endif
 
-    public interface IEntityManager
+    public interface IEntityManager : IDisposable
     {
         public event Action<IEntity, IReadOnlyList<IComponent>> Instantiated;
 

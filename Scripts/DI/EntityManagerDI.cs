@@ -3,6 +3,7 @@
 namespace UniT.Entities.DI
 {
     using UniT.DI;
+    using UniT.Logging.DI;
     using UniT.Pooling.DI;
 
     public static class EntityManagerDI
@@ -10,6 +11,7 @@ namespace UniT.Entities.DI
         public static void AddEntityManager(this DependencyContainer container)
         {
             if (container.Contains<IEntityManager>()) return;
+            container.AddLoggerManager();
             container.AddObjectPoolManager();
             container.AddInterfaces<EntityManager>();
         }
