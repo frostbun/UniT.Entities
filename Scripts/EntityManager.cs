@@ -4,6 +4,8 @@ namespace UniT.Entities
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
     using UniT.DI;
     using UniT.Extensions;
     using UniT.Logging;
@@ -11,12 +13,6 @@ namespace UniT.Entities
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
-    #if UNIT_UNITASK
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
-    #else
-    using System.Collections;
-    #endif
 
     public sealed class EntityManager : IEntityManager
     {
@@ -63,27 +59,11 @@ namespace UniT.Entities
             this.objectPoolManager.Load(prefab.gameObject, count);
         }
 
-        #if !UNITY_WEBGL
-        void IEntityManager.Load(object key, int count)
-        {
-            this.trackingKeys.Add(key);
-            this.objectPoolManager.Load(key, count);
-        }
-        #endif
-
-        #if UNIT_UNITASK
         UniTask IEntityManager.LoadAsync(object key, int count, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             this.trackingKeys.Add(key);
             return this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
         }
-        #else
-        IEnumerator IEntityManager.LoadAsync(object key, int count, Action? callback, IProgress<float>? progress)
-        {
-            this.trackingKeys.Add(key);
-            return this.objectPoolManager.LoadAsync(key, count, callback, progress);
-        }
-        #endif
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3? position, Quaternion? rotation, Transform? parent, bool spawnInWorldSpace)
         {

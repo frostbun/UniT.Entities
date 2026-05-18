@@ -4,14 +4,10 @@ namespace UniT.Entities
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using UniT.Extensions;
-    using UnityEngine;
-    #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    #else
-    using System.Collections;
-    #endif
+    using UniT.Extensions;
+    using UnityEngine;
 
     public interface IEntityManager : IDisposable
     {
@@ -25,9 +21,7 @@ namespace UniT.Entities
 
         public void Load(IEntity prefab, int count = 1);
 
-        #if !UNITY_WEBGL
-        public void Load(object key, int count = 1);
-        #endif
+        public UniTask LoadAsync(object key, int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
 
         public TEntity Spawn<TEntity>(TEntity prefab, Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams;
 
@@ -55,10 +49,8 @@ namespace UniT.Entities
 
         #region Implicit Key
 
-        #if !UNITY_WEBGL
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
-        #endif
+        public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TEntity Spawn<TEntity>(Vector3? position = null, Quaternion? rotation = null, Transform? parent = null, bool spawnInWorldSpace = true) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent, spawnInWorldSpace);
@@ -74,22 +66,6 @@ namespace UniT.Entities
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Unload<TEntity>() where TEntity : IEntity => this.Unload(typeof(TEntity).GetKey());
-
-        #endregion
-
-        #region Async
-
-        #if UNIT_UNITASK
-        public UniTask LoadAsync(object key, int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
-        #else
-        public IEnumerator LoadAsync(object key, int count = 1, Action? callback = null, IProgress<float>? progress = null);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator LoadAsync<TEntity>(int count = 1, Action? callback = null, IProgress<float>? progress = null) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, callback, progress);
-        #endif
 
         #endregion
     }

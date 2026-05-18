@@ -2,12 +2,7 @@
 namespace UniT.Entities.Controller
 {
     using System.Diagnostics.CodeAnalysis;
-    #if UNIT_UNITASK
     using System.Threading;
-    #else
-    using System.Collections;
-    using System.Collections.Generic;
-    #endif
 
     public abstract class Controller<TComponent> : IController where TComponent : IComponentWithController
     {
@@ -79,21 +74,7 @@ namespace UniT.Entities.Controller
 
         #endregion
 
-        #region Async
-
-        #if UNIT_UNITASK
         protected CancellationToken GetCancellationTokenOnDisable() => this.Component.GetCancellationTokenOnDisable();
-        #else
-        protected void StartCoroutine(IEnumerator coroutine) => this.Component.StartCoroutine(coroutine);
-
-        protected void StopCoroutine(IEnumerator coroutine) => this.Component.StopCoroutine(coroutine);
-
-        protected IEnumerator GatherCoroutines(params IEnumerator[] coroutines) => this.Component.GatherCoroutines(coroutines);
-
-        protected IEnumerator GatherCoroutines(IEnumerable<IEnumerator> coroutines) => this.Component.GatherCoroutines(coroutines);
-        #endif
-
-        #endregion
 
         #endregion
     }
