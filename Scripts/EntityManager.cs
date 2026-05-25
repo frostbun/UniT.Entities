@@ -87,7 +87,11 @@ namespace UniT.Entities
             return this.objectPoolManager.Spawn<TEntity>(key, position, rotation, parent, spawnInWorldSpace);
         }
 
-        void IEntityManager.Recycle(IEntity entity) => this.objectPoolManager.Recycle(entity.gameObject);
+        void IEntityManager.Recycle(IEntity instance)
+        {
+            if (instance.Equals(null)) return;
+            this.objectPoolManager.Recycle(instance.gameObject);
+        }
 
         void IEntityManager.RecycleAll(IEntity prefab) => this.objectPoolManager.RecycleAll(prefab.gameObject);
 
