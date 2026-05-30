@@ -1,0 +1,8 @@
+{
+  "name": "UniT.Entities.Controller",
+  "references": [
+    "UniT.Entities",
+    "UniT.Extensions",
+    "UniT.DI"
+  ]
+}

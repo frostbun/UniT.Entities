@@ -2,9 +2,9 @@
 namespace UniT.Entities
 {
     using UniT.DI;
-    using UniT.Extensions;
+    using UnityEngine;
 
-    public abstract class Component : BetterMonoBehavior, IComponent
+    public abstract class Component : MonoBehaviour, IComponent
     {
         IDependencyContainer IComponent.Container { set => this.Container = value; }
 

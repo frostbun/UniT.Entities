@@ -1,5 +1,5 @@
 #nullable enable
-namespace UniT.Entities
+namespace UniT.Entities.Default
 {
     using System;
     using System.Collections.Generic;
@@ -133,7 +133,7 @@ namespace UniT.Entities
         {
             if (!instance.TryGetComponent<IEntity>(out var entity)) return;
             this.objToEntity.Add(instance, entity);
-            var components = entity.GetComponentsInChildren<IComponent>();
+            var components = entity.gameObject.GetComponentsInChildren<IComponent>();
             this.entityToComponents.Add(entity, components);
             foreach (var component in components.AsSpan())
             {

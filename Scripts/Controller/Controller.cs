@@ -1,9 +1,6 @@
 #nullable enable
 namespace UniT.Entities.Controller
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Threading;
-
     public abstract class Controller<TComponent> : IController where TComponent : IComponentWithController
     {
         IComponent IController.Component { set => this.Component = (TComponent)value; }
@@ -29,53 +26,5 @@ namespace UniT.Entities.Controller
         protected virtual void OnRecycle() { }
 
         protected virtual void OnCleanup() { }
-
-        #region Extensions
-
-        #region Self
-
-        protected T? GetComponentOrDefault<T>() => this.Component.GetComponentOrDefault<T>();
-
-        protected T GetComponent<T>() => this.Component.GetComponent<T>();
-
-        protected T[] GetComponents<T>() => this.Component.GetComponents<T>();
-
-        protected bool HasComponent<T>() => this.Component.HasComponent<T>();
-
-        protected bool TryGetComponent<T>([MaybeNullWhen(false)] out T component) => this.Component.TryGetComponent(out component);
-
-        #endregion
-
-        #region Children
-
-        protected T? GetComponentInChildrenOrDefault<T>(bool includeInactive = false) => this.Component.GetComponentInChildrenOrDefault<T>(includeInactive);
-
-        protected T GetComponentInChildren<T>(bool includeInactive = false) => this.Component.GetComponentInChildren<T>(includeInactive);
-
-        protected T[] GetComponentsInChildren<T>(bool includeInactive = false) => this.Component.GetComponentsInChildren<T>(includeInactive);
-
-        protected bool HasComponentInChildren<T>(bool includeInactive = false) => this.Component.HasComponentInChildren<T>(includeInactive);
-
-        protected bool TryGetComponentInChildren<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => this.Component.TryGetComponentInChildren(out component, includeInactive);
-
-        #endregion
-
-        #region Parent
-
-        protected T? GetComponentInParentOrDefault<T>(bool includeInactive = false) => this.Component.GetComponentInParentOrDefault<T>(includeInactive);
-
-        protected T GetComponentInParent<T>(bool includeInactive = false) => this.Component.GetComponentInParent<T>(includeInactive);
-
-        protected T[] GetComponentsInParent<T>(bool includeInactive = false) => this.Component.GetComponentsInParent<T>(includeInactive);
-
-        protected bool HasComponentInParent<T>(bool includeInactive = false) => this.Component.HasComponentInParent<T>(includeInactive);
-
-        protected bool TryGetComponentInParent<T>([MaybeNullWhen(false)] out T component, bool includeInactive = false) => this.Component.TryGetComponentInParent(out component, includeInactive);
-
-        #endregion
-
-        protected CancellationToken GetCancellationTokenOnDisable() => this.Component.GetCancellationTokenOnDisable();
-
-        #endregion
     }
 }
