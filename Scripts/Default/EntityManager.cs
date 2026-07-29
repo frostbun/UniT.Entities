@@ -114,7 +114,7 @@ namespace UniT.Entities
 
         IEnumerable<T> IEntityManager.Query<T>()
         {
-            return this.typeToSpawnedComponents.GetOrDefault(typeof(T))?.Cast<T>() ?? Enumerable.Empty<T>();
+            return this.typeToSpawnedComponents.GetValueOrDefault(typeof(T))?.Cast<T>() ?? Enumerable.Empty<T>();
         }
 
         void IDisposable.Dispose()
